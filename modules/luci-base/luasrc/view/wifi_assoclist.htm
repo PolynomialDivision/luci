@@ -72,6 +72,7 @@
 							bss.link,
 							bss.name,
 							bss.ifname),
+						bss.devicename,
 						bss.bssid,
 						bss.host_hint ? '%h (%h)'.format(bss.host_name || '?', bss.host_hint) : (bss.host_name || '?'),
 						'<span class="ifacebadge" title="<%:Signal%>: %d <%:dBm%> / <%:Noise%>: %d <%:dBm%> / <%:SNR%>: %d"><img src="%s" /> %d / %d <%:dBm%></span>'.format(
@@ -106,6 +107,7 @@
 <div class="table" id="wifi_assoclist_table">
 	<div class="tr table-titles">
 		<div class="th nowrap"><%:Network%></div>
+		<div class="th nowrap"><%:Device%></div>
 		<div class="th hide-xs"><%:MAC-Address%></div>
 		<div class="th nowrap"><%:Host%></div>
 		<div class="th nowrap"><%:Signal%> / <%:Noise%></div>

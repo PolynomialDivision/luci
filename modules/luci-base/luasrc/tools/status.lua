@@ -219,6 +219,8 @@ function wifi_network(id)
 end
 
 function wifi_assoclist()
+	local json = require "luci.json"
+	local utl = require "luci.util"
 	local sys = require "luci.sys"
 	local ntm = require "luci.model.network".init()
 	local hosts = sys.net.host_hints()
@@ -233,6 +235,7 @@ function wifi_assoclist()
 			local netname = net:shortname()
 			local netlink = net:adminlink()
 			local ifname  = net:ifname()
+			local clients = utl.ubus("hostapd." .. ifname, "get_clients", { }) 
 
 			for _, bss in pairs(net:assoclist() or {}) do
 				local host = hosts[_]
@@ -242,6 +245,20 @@ function wifi_assoclist()
 				bss.radio  = radioname
 				bss.name   = netname
 				bss.link   = netlink
+
+				local signature = clients["clients"][string.lower(_)]["signature"]
+				bss.signature = signature
+			
+				local httpclient = require('luci.httpclient')
+				if not(signature == nil) then
+					local key = "3f571d11466714f41d72bc9aac30858b80d36fa4"
+					local url = "http://wifiscout.inet.tu-berlin.de/api/v1/device/?key=" .. key .. "&signature=" .. signature
+					local rc, r, txt, s = httpclient.request_raw(url)
+					local req = json.decode(txt)
+					if not(req["results"] == nil) then
+						bss.devicename = req["results"][1]["name"]
+					end
+				end
 
 				bss.host_name = (host) and (host.name or host.ipv4 or host.ipv6)
 				bss.host_hint = (host and host.name and (host.ipv4 or host.ipv6)) and (host.ipv4 or host.ipv6)
